@@ -4,6 +4,7 @@ body {
   font-family: sans-serif;
 }
 
-#map {
-  height: 100%;
+.map {
+  width: 500px;
+  height: 500px;
 }
