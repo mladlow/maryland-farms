@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import loadjs from 'loadjs';
 import {GOOGLE_API_KEY} from '../data/GoogleApiKey';
+import stables from '../data/stables.json'
 
 // eslint-disable-next-line
 const MARYLAND = {
@@ -27,17 +28,22 @@ class FarmMap extends Component {
           center: DC,
           zoom: 8
         });
-        const marker = new window.google.maps.Marker({
-          position: {lat: 39.327982, lng: -77.1658695},
-          map: this.map,
-          title: 'A Deck Above Farm',
-          animation: window.google.maps.Animation.DROP,
-          id: 1,
+        const markers = [];
+        const infoWindows = [];
+        stables.forEach((stable) => {
+          const marker = new window.google.maps.Marker({
+            position: stable.position,
+            map: this.map,
+            title: stable.title,
+            id: stable.id,
+          });
+          const infoWindow = new window.google.maps.InfoWindow({
+            content: stable.title + "\n" + stable.address,
+          });
+          marker.addListener('click', () => infoWindow.open(this.map, marker));
+          markers.push(marker);
+          infoWindows.push(infoWindow);
         });
-        const infoWindow = new window.google.maps.InfoWindow({
-          content: 'A Deck Above Farm (eventing)',
-        });
-        marker.addListener('click', () => infoWindow.open(this.map, marker));
       },
     });
   }
