@@ -14,6 +14,15 @@ const DC = {
   lng: -77.0846065,
 };
 
+const populateInfoWindow = (stable, marker, infoWindow) => {
+  if (infoWindow.marker !== marker) {
+    infoWindow.marker = marker;
+    infoWindow.setContent('<div>' + marker.title + '</div><div>' + stable.address + '</div>');
+    infoWindow.open(marker.map, marker);
+    infoWindow.addListener('closeclick', () => infoWindow.setMarker(null));
+  }
+};
+
 class FarmMap extends Component {
   constructor(props) {
     super(props);
@@ -29,7 +38,7 @@ class FarmMap extends Component {
           zoom: 8
         });
         const markers = [];
-        const infoWindows = [];
+        const infoWindow = new window.google.maps.InfoWindow();
         stables.forEach((stable) => {
           const marker = new window.google.maps.Marker({
             position: stable.position,
@@ -37,12 +46,8 @@ class FarmMap extends Component {
             title: stable.title,
             id: stable.id,
           });
-          const infoWindow = new window.google.maps.InfoWindow({
-            content: stable.title + "\n" + stable.address,
-          });
-          marker.addListener('click', () => infoWindow.open(this.map, marker));
+          marker.addListener('click', () => populateInfoWindow(stable, marker, infoWindow));
           markers.push(marker);
-          infoWindows.push(infoWindow);
         });
       },
     });
