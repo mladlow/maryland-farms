@@ -2,7 +2,6 @@
   "name": "maryland-farms",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://meggiel.com/maryland-farms",
   "dependencies": {
     "loadjs": "^3.4.0",
     "react": "^15.4.2",
