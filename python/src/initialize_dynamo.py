@@ -108,6 +108,7 @@ def add_to_dynamo(stable, geocoded_data, dyanmo_table):
             'title': stable[1],
             'position': geocoded_data['results'][0]['geometry']['location'],
             'address': geocoded_data['results'][0]['formatted_address'],
+            'phone': stable[-1],
             }
     #keep_on = raw_input('Write to file? ')
     keep_on = 'y'
@@ -124,14 +125,14 @@ def process_data():
     for stable in stable_list:
         if os.path.isfile('./data/json/' + stable[0] + '.json'):
             continue
-        #print stable
+        print stable
         #keep_on = raw_input('Geocode? ')
         keep_on = 'y'
         if (keep_on == 'y'):
             geocoded = geocode_address(api_key, stable[3:7])
             #print json.dumps(geocoded, indent=4)
             add_to_dynamo(stable, geocoded, dynamo_table)
-        time.sleep(5)
+            time.sleep(5)
 
 if __name__ == '__main__':
     process_data()

@@ -1,3 +1,22 @@
+# Maryland Farms
+
+This project uses a CSV of data from the Maryland Horse Industry Board to generate a geocoded map of the licensed stables in Maryland. The data is from 2015, so it's a bit stale.
+
+### Geocoding
+
+The project uses python to parse and geocode the data, which it currently stores as JSON files on disk. I use `scripts/geocode.sh` to kick off the geocoding process. A google API key is required.
+
+### Single JSON file
+
+The `scripts/makeStables.sh` file combines the individual stable JSON data into a single file for consumption by the Javascript.
+
+### Javascript
+
+Run `yarn start` the JSON is combined to see the stables locally.
+
+
+# Create React App Docs
+
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>
