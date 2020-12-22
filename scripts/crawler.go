@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -9,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 // Regexp vars
@@ -18,12 +21,94 @@ var (
 	articleRegexp = regexp.MustCompile(`(?s)(?P<ARTICLE><article>.+?</article>)`)
 	phoneRegexp   = regexp.MustCompile(`Tel: (?P<PHONE>[0-9\-\(\)]+)<`)
 	siteRegexp    = regexp.MustCompile(`Website: (?P<SITE>.+?)<`)
-	addressRegexp = regexp.MustCompile(`<a href="https://maps.google.com/\?q=(?P<ADDRESS>.+?)">`)
+	addressRegexp = regexp.MustCompile(`(?s)<a href="https://maps.google.com/\?q=(?P<ADDRESS>.+?)">`)
 )
-var url = "https://portal.mda.maryland.gov/stables"
+
+// String vars
+var (
+	url          = "https://portal.mda.maryland.gov/stables"
+	idFileName   = "./ids.txt"
+	errFileName  = "./errIds.txt"
+	dataFileName = "./data.json"
+)
 
 func main() {
-	WriteIdList()
+	// Use WriteIdList to get a list of stable IDs into ids.txt.
+	// Use IterateIdList to use the stable ID list.
+	// WriteIdList()
+	fileInfo, err := os.Stat(idFileName)
+	if os.IsNotExist(err) {
+		WriteIdList()
+	} else if !fileInfo.IsDir() {
+		IterateIdList()
+	} else {
+		fmt.Fprintf(os.Stderr, "main: Problem with id file\n")
+	}
+}
+
+func IterateIdList() {
+	// Read ids.txt into an array
+	// Start 10 goroutines, use atomic int to track index in array
+	// Goroutine will fail and add to list of failures if index %9
+	// Goroutine will otherwise succeed
+	// Write list of failures
+	idFile, err := os.Open(idFileName)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening id file %v\n", err)
+		return
+	}
+	// I read somewhere that this was bad because os.Close can create an error
+	// but in such short-lived and non critical software I don't know if I
+	// care.
+	defer idFile.Close()
+
+	errFile, err := os.Create(errFileName)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening error file %v\n", err)
+		return
+	}
+	defer errFile.Close()
+
+	dataFile, err := os.Create(dataFileName)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening data file %v\n", err)
+		return
+	}
+	defer dataFile.Close()
+
+	idCh := make(chan string)
+	stableCh := make(chan Stable)
+
+	// Does the order here matter?
+	// addIds closes idCh - would not be managable with larger codebase.
+	go addIds(idFile, idCh)
+
+	wg := new(sync.WaitGroup)
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go processStablePage(idCh, stableCh, wg)
+	}
+
+	go func() {
+		wg.Wait()
+		close(stableCh)
+	}()
+
+	for stable := range stableCh {
+		if stable.Name == "" {
+			errFile.WriteString(fmt.Sprintf("%s\n", stable.ID))
+		} else {
+			stableJson, err := json.Marshal(stable)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Marshal failed for %s, %v\n", stable.ID, err)
+				errFile.WriteString(fmt.Sprintf("%s\n", stable.ID))
+				continue
+			}
+			stableJson = append(stableJson, '\n')
+			dataFile.Write(stableJson)
+		}
+	}
+	fmt.Printf("Done!\n")
 }
 
 func WriteIdList() {
@@ -35,9 +120,10 @@ func WriteIdList() {
 		go processIdPage(i, ch)
 	}
 
-	idFile, err := os.Create("./ids.txt")
+	idFile, err := os.Create(idFileName)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error opening id file %v\n", err)
+		return
 	}
 
 	doneCount := 0
@@ -110,32 +196,73 @@ func parseIdsWithReadAll(data []byte) []string {
 	return ids
 }
 
-func extractStable(data []byte) (*Stable, error) {
+func addIds(idFile *os.File, idCh chan<- string) {
+	scanner := bufio.NewScanner(idFile)
+	for scanner.Scan() {
+		idCh <- scanner.Text()
+	}
+	close(idCh)
+}
+
+func processStablePage(idCh <-chan string, stableCh chan<- Stable, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	for id := range idCh {
+		stable := Stable{ID: id}
+
+		stableUrl := strings.Join([]string{url, "//", id}, "")
+		resp, err := http.Get(stableUrl)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "GET err for ID %s: %v\n", id, err)
+			stableCh <- stable
+			continue
+		}
+		b, err := ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "ReadAll err for ID %s: %v\n", id, err)
+			stableCh <- stable
+			continue
+		}
+
+		// Question here is should we mutate the Stable or return a new Stable?
+		// Mutating means we need to make a new Stable to return with the name
+		// (which denotes failure and required re-processing) unset.
+		err = stable.extractStable(b)
+		if err != nil {
+			stableCh <- Stable{ID: id}
+		} else {
+			stableCh <- stable
+		}
+	}
+}
+
+func (stable *Stable) extractStable(data []byte) error {
 	// This function takes a page with information about a single stable and
-	// extracts that information into a struct.
+	// extracts that information into a struct. It mutates the input stable.
 
 	// Pick out the stable name from the <h1> tags
 	matches := nameRegexp.FindAllSubmatch(data, -1)
 	if len(matches) != 1 {
-		return nil, errors.New(fmt.Sprintf("extractStable: Found %d name(s)\n", len(matches)))
+		return errors.New(fmt.Sprintf("extractStable: Found %d name(s)\n", len(matches)))
 	}
 	nameMatch := fmt.Sprintf("%s", matches[0][1])
 	nameMatch = strings.TrimSpace(nameMatch)
-	stable := Stable{Name: nameMatch}
+	stable.Name = nameMatch
 
 	// Pull out the article section
 	matches = articleRegexp.FindAllSubmatch(data, -1)
 	if len(matches) != 1 {
-		return nil, errors.New(fmt.Sprintf("extractStable: Found %d article(s)\n", len(matches)))
+		return errors.New(fmt.Sprintf("extractStable: Found %d article(s)\n", len(matches)))
 	}
 	article := fmt.Sprintf("%s", matches[0][1])
 
 	// Pull out the address from the article
 	strMatches := addressRegexp.FindAllStringSubmatch(article, -1)
 	if len(strMatches) != 1 {
-		return nil, errors.New(fmt.Sprintf("extractStable: Found %d address(es)\n", len(strMatches)))
+		return errors.New(fmt.Sprintf("extractStable: Found %d address(es)\n", len(strMatches)))
 	}
-	stable.Address = strMatches[0][1]
+	stable.Address = strings.ReplaceAll(strMatches[0][1], "\n", " ")
 
 	// Look for the first website and phone number
 	strMatches = phoneRegexp.FindAllStringSubmatch(article, -1)
@@ -146,7 +273,7 @@ func extractStable(data []byte) (*Stable, error) {
 	if len(strMatches) >= 1 {
 		stable.Website = strMatches[0][1]
 	}
-	return &stable, nil
+	return nil
 }
 
 type Stable struct {

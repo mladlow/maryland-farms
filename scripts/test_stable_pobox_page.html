@@ -1,0 +1,367 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MDA Vetboard</title>
+    <meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="j4EuedrV9oMgj0hYDM3f4qFEh8vwVH3uz1l5aOHbX0GvT/qwLNVgZeUZIIRHOVbSY5CE3+/udEyS3Ado3xj2oQ==" />
+    <link rel="shortcut icon" type="image/x-icon" href="/assets/favicon-657ca97f27a05e2e7af4ee718b28ebccd68c32e3cfeee444ea0dbbedff5ff601.png" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"/>
+
+    <link rel="stylesheet" media="all" href="/assets/application-49fd1249911a5e5779f36f7050feae58f610ef07336dd72542d54c098addf853.css" data-turbolinks-track="reload" />
+    <script src="/assets/application-4ce88e64cebd91e2daa8898f9c389e95fe490abae1ab05deff6502f7bf719a24.js" data-turbolinks-track="reload"></script>
+    <script src="/packs/application-33623a6a355d1f866f08.js" data-turbolinks-track="reload"></script>
+    
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+  <div class="container">
+    <a class="navbar-brand" href="https://portal.mda.maryland.gov/">
+      <img height="40" alt="Maryland One Stop Logo" src="/assets/vetboard_logo-dd45dcb524f2cc76452ef15c62f830b6092b53ec8b07796e4efd4a50e7548a46.png" />
+</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" style="font-weight: 700;" href="#" id="findDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span>Find Professionals & Facilities</span>
+          </a>
+          <div class="dropdown-menu" aria-labelledby="findDropdown">
+            <a class="dropdown-item" href="/veterinarians">Veterinarians &amp; Veterinary Technicians</a>
+            <a class="dropdown-item" href="/hospitals">Hospitals</a>
+            <a class="dropdown-item" href="/control_facilities">Animal Control Facilities</a>
+            <a class="dropdown-item" href="/stables">Horse Stables</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+              <button name="button" type="button" id="login" class="btn-ghost blue" data-target="#login_modal" data-toggle="modal">Log In</button>
+                <button name="button" type="button" id="register" class="btn-ghost blue" data-target="#register_modal" data-toggle="modal">Register</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  <aside>
+    <div class="modal fade login" id="login_modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <button name="button" type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+</button>      </div>
+
+      <div class="modal-body">
+        <h2>Log In</h2>
+
+<form action="https://portal.mda.maryland.gov/users/sign_in" accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="&#x2713;" /><input type="hidden" name="authenticity_token" value="Ot8TzcFkmca2ghg220v7+syiQH1V4IF/ERtveoe8RYGh3O7IagRJn6KRELuZYiLgPlft3k5JxHmdsEh9AraCcA==" />
+    
+    
+    
+
+  <fieldset>
+    <div class="row">
+      <div class="col-lg-12">
+        <label for="user_email">Email</label>
+        <input id="user_login_email" autocomplete="email" type="email" name="user[email]" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <label for="user_password">Password</label>
+        <input id="user_login_password" autocomplete="off" type="password" name="user[password]" />
+
+        <a href="/users/password/new">Forgot your password?</a>
+
+
+      </div>
+    </div>
+
+    <div class="cta">
+      <input type="submit" name="commit" value="Log In" class="btn blue" data-disable-with="Log In" />
+    </div>
+</fieldset></form>
+<hr>
+
+<div class="links-footer">
+
+      Don't have an account?
+      <a href="/users/sign_up">Sign up</a>
+
+</div>
+
+
+
+
+
+
+
+
+
+      </div>
+
+    </div>
+  </div>
+</div>
+    <div class="modal fade signup" id="register_modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content container">
+
+      <div class="modal-header">
+        <button name="button" type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+</button>      </div>
+
+      <div class="modal-body">
+        <h2 class="blue">Register an Account</h2>
+<div class="password-validator">
+  <form id="user_registration_form" action="https://portal.mda.maryland.gov/users" accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="&#x2713;" /><input type="hidden" name="authenticity_token" value="OXKw99Qfyv1dnXEk280NeBZlmkWKKdzk8hOKils9E5Sl6klo//yWtnAmKN7fmBLz7xUr/2PFVnfCr6eFIT65Qg==" />
+
+  
+  <fieldset>
+    <div class="row">
+        <div class="col-lg-8">
+          <label for="user_previously_licensed">Are you registering an account to manage an existing license?</label>
+        </div>
+        <div class="col-lg-4">
+          <span>
+            <input data-check-field="previously_licensed" type="radio" value="true" name="user[previously_licensed]" id="user_previously_licensed_true" />
+            <label for="user_previously_licensed_true">Yes</label>
+          </span>
+          <span>
+            <input type="radio" value="false" name="user[previously_licensed]" id="user_previously_licensed_false" />
+            <label for="user_previously_licensed_false">No</label>
+          </span>
+        </div>
+      </div>
+
+    <div class="row" data-reveal-field='previously_licensed'>
+      <div class="col-lg-8">
+        <label for="user_stable_owner">Are you registering to manage an existing Stable license?</label>
+      </div>
+      <div class="col-lg-4">
+          <span>
+            <input type="radio" value="true" name="user[stable_owner]" id="user_stable_owner_true" />
+            <label for="user_stable_owner_true">Yes</label>
+          </span>
+        <span>
+            <input data-check-field="stable_owner" type="radio" value="false" name="user[stable_owner]" id="user_stable_owner_false" />
+          <label for="user_stable_owner_false">No</label>
+          </span>
+      </div>
+    </div>
+
+      <div class="row" data-reveal-field='stable_owner'>
+        <div class="col-lg-6">
+          <label for="user_ssn">Social Security Number</label>
+          <input type="text" name="user[ssn]" id="user_ssn" />
+        </div>
+        <div class="col-lg-6">
+          <label for="user_dob">Date of Birth</label>
+          <input class="datepicker" type="text" name="user[dob]" id="user_dob" />
+        </div>
+      </div>
+
+    <div class="row field">
+      <div class="col-lg-12">
+        <label for="user_email">Email</label>
+        <input id="user_email" type="email" name="user[email]" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="field">
+          <label for="user_password">Password</label>
+          <input id="user_password" autocomplete="off" type="password" name="user[password]" />
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="field">
+          <label for="user_password_confirmation">Password Confirmation</label>
+          <input autocomplete="off" type="password" name="user[password_confirmation]" id="user_password_confirmation" />
+        </div>
+      </div>
+    </div>
+
+    <div class="row alert yellow">
+  <div class="col-lg pt-2">
+    <strong>Your password must:</strong>
+    <ul class="list pl-3 pb-2 mt-3">
+        <li class="no-email-valid-password-message"><span class="icon circle gray"></span> Not include your email address.</li>
+      <li class="number-count-valid-password-message"><span class="icon circle gray"></span> Include at least one number.<br>
+      <li class="special-character-valid-password-message"><span class="icon circle gray"></span> Include at least one special character. (such as ! # $ % &amp; * + ~ @)<br>
+      <li class="uppercase-lowercase-valid-password-message"><span class="icon circle gray"></span> Include both lower and upper case characters (a-z) (A-Z).</li>
+      <li class="length-valid-password-message"><span class="icon circle gray"></span> Be at least 8 characters long.</li>
+    </ul>
+  </div>
+</div>
+</fieldset>
+  <div class="cta">
+    <input type="submit" name="commit" value="Register" class="btn blue" id="register_button" data-disable-with="Register" />
+  </div>
+
+</form></div>
+<hr>
+
+<div class="links-footer">
+
+      Already have an account?
+      <a href="/users/sign_in">Log in</a>
+
+</div>
+
+
+
+
+
+
+
+
+      </div>
+
+    </div>
+  </div>
+</div>
+  </aside>
+
+
+
+    <header class="show">
+  <div class="container">
+    <h1>
+      FOX QUARTER FARM, LLC
+      <small>Horse Stable</small>
+    </h1>
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="/stables">Horse Stables Listing</a></li>
+      <li class="breadcrumb-item active"><p>FOX QUARTER FARM, LLC</p></li>
+    </ol>
+  </div>
+</header>
+
+<main>
+  <section class="show">
+
+      <div class="container">
+        <div class="cards-container show">
+          <div class="row">
+            <div class="col-md-6">
+              <h4>License #</h4>
+            </div>
+            <div class="col-md-6">
+              <h4>Types of services</h4>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <p>2001</p>
+            </div>
+            <div class="col-md-6">
+              <p>Boarding, Instruction, Rental, Rescue, Therapeutic, Training</p>
+            </div>
+          </div>
+        </div>
+        <hr>
+      </div>
+
+    <div class="container">
+      <article>
+        <div class="row">
+          <div class="col-lg-4">
+            <h4>Address:</h4>
+            <a href="https://maps.google.com/?q=3875 BARK HILL ROAD
+P.O. Box 600 UNION BRIDGE, MD, 21791">
+                3875 BARK HILL ROAD
+P.O. Box 600<br/>
+              UNION BRIDGE, MD, 21791<br/>
+</a>            <br>
+            <h4>Contact:</h4>
+            <p><a href="tel:410-984-2011">Tel: 410-984-2011</a></p>
+            <p></p>
+            <p></p>
+          </div>
+          <div class="col-lg-8">
+            <iframe src="https://maps.google.com/maps?q=3875%20BARK%20HILL%20ROAD%0D%0AP.O.%20Box%20600%20UNION%20BRIDGE,%20MD,%2021791&output=embed" frameborder="0" style="border:0" allowfullscreen></iframe>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="container">
+
+      <div class="alert grey">
+        <p>Do you have a complaint against this stable? <a class="link" href="/stable_complaints">File a complaint against FOX QUARTER FARM, LLC</a></p>
+      </div>
+
+    </div>
+
+  </section>
+</main>
+    <footer>
+  <div class="container">
+    <address>
+      <div class="row">
+        <div class="col-lg-6">
+          <ul>
+            <li><a target="_blank" rel="nofollow" href="https://mda.maryland.gov/vetboard/Pages/default.aspx">Contact Us</a></li>
+            <li><a target="_blank" rel="nofollow" href="http://www.maryland.gov/pages/privacy_security.aspx">Privacy</a></li>
+            <li><a target="_blank" rel="nofollow" href="http://www.maryland.gov/pages/accessibility.aspx">Accessibility</a></li>
+            <li><a data-toggle="modal" data-target="#complaint_type_modal" class="small" href="">File a Complaint</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-6">
+          <ul>
+            <li><a class="icon facebook" target="_blank" rel="nofollow" href="https://www.facebook.com/MdAgDept"></a></li>
+            <li><a class="icon twitter" href="https://twitter.com/MdVetBoard"></a></li>
+            <li><a class="icon youtube" target="_blank" rel="nofollow" href="https://www.youtube.com/channel/UCN3dEV5ddJYbGQu64h79tgg"></a></li>
+          </ul>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="row address">
+        <div class="col-lg-6">
+          <p><a target="_blank" rel="nofollow" href="https://mda.maryland.gov/vetboard/Pages/default.aspx">Maryland Board of Veterinary Medical Examiners</a></p>
+          <p><a href="tel:4108415862">410-841-5862</a></p>
+        </div>
+        <div class="col-lg-6">
+          <p class="copyright">© 2018 (2020-09-22 22:42:12 +0000)</p>
+        </div>
+      </div>
+    </address>
+  </div>
+</footer>
+
+<div class="modal fade" id="complaint_type_modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <button name="button" type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+</button>
+        <h3>What kind of Complaint would you like to submit?</h3>
+      </div>
+
+      <div class="modal-footer">
+        <div class="cta">
+          <a class="btn blue" href="/complaints/new">Veterinary Board Complaint</a>
+          <a class="btn blue" href="/stable_complaints">Horse Stable Complaint</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  </body>
+</html>
