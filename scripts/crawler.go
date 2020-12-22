@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -10,28 +11,24 @@ import (
 	"strings"
 )
 
-var idRegexp = regexp.MustCompile(`<a href="/stables/(?P<ID>[0-9a-zA-Z]+)">`)
+// Regexp vars
+var (
+	idRegexp      = regexp.MustCompile(`<a href="/stables/(?P<ID>[0-9a-zA-Z]+)">`)
+	nameRegexp    = regexp.MustCompile(`(?s)<h1>(?P<NAME>.+?)<`)
+	articleRegexp = regexp.MustCompile(`(?s)(?P<ARTICLE><article>.+?</article>)`)
+	phoneRegexp   = regexp.MustCompile(`Tel: (?P<PHONE>[0-9\-\(\)]+)<`)
+	siteRegexp    = regexp.MustCompile(`Website: (?P<SITE>.+?)<`)
+	addressRegexp = regexp.MustCompile(`<a href="https://maps.google.com/\?q=(?P<ADDRESS>.+?)">`)
+)
 var url = "https://portal.mda.maryland.gov/stables"
 
 func main() {
 	WriteIdList()
-	/*
-		resp, err := http.Get(url)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
-			os.Exit(1)
-		}
-		b, err := ioutil.ReadAll(resp.Body)
-		resp.Body.Close()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
-			os.Exit(1)
-		}
-		fmt.Printf("%s", b)
-	*/
 }
 
 func WriteIdList() {
+	// This function parses the paginated list of stables and extracts the
+	// stable IDs. Stable IDs form the URL of the individual stable pages.
 	ch := make(chan string)
 	// Start 10 goroutines which will work over pages getting IDs
 	for i := 1; i < 11; i++ {
@@ -68,6 +65,8 @@ func WriteIdList() {
 }
 
 func processIdPage(page int, ch chan<- string) {
+	// This function takes a single page containing a list of stables and
+	// reads all the IDs off the page.
 	for {
 		if page > 100 {
 			fmt.Fprintf(os.Stderr, "Emergency stopgap at page %d\n", page)
@@ -101,13 +100,61 @@ func processIdPage(page int, ch chan<- string) {
 }
 
 func parseIdsWithReadAll(data []byte) []string {
-	// Assumes that we're going to call ioutil.ReadAll on resp.Body
+	// This function uses a regexp to get all the IDs off a page read into
+	// memory. It assumes that we're going to call ioutil.ReadAll on resp.Body.
 	matches := idRegexp.FindAllSubmatch(data, -1)
 	var ids []string
 	for _, match := range matches {
 		ids = append(ids, fmt.Sprintf("%s", match[1]))
 	}
 	return ids
+}
+
+func extractStable(data []byte) (*Stable, error) {
+	// This function takes a page with information about a single stable and
+	// extracts that information into a struct.
+
+	// Pick out the stable name from the <h1> tags
+	matches := nameRegexp.FindAllSubmatch(data, -1)
+	if len(matches) != 1 {
+		return nil, errors.New(fmt.Sprintf("extractStable: Found %d name(s)\n", len(matches)))
+	}
+	nameMatch := fmt.Sprintf("%s", matches[0][1])
+	nameMatch = strings.TrimSpace(nameMatch)
+	stable := Stable{Name: nameMatch}
+
+	// Pull out the article section
+	matches = articleRegexp.FindAllSubmatch(data, -1)
+	if len(matches) != 1 {
+		return nil, errors.New(fmt.Sprintf("extractStable: Found %d article(s)\n", len(matches)))
+	}
+	article := fmt.Sprintf("%s", matches[0][1])
+
+	// Pull out the address from the article
+	strMatches := addressRegexp.FindAllStringSubmatch(article, -1)
+	if len(strMatches) != 1 {
+		return nil, errors.New(fmt.Sprintf("extractStable: Found %d address(es)\n", len(strMatches)))
+	}
+	stable.Address = strMatches[0][1]
+
+	// Look for the first website and phone number
+	strMatches = phoneRegexp.FindAllStringSubmatch(article, -1)
+	if len(strMatches) >= 1 {
+		stable.Phone = strMatches[0][1]
+	}
+	strMatches = siteRegexp.FindAllStringSubmatch(article, -1)
+	if len(strMatches) >= 1 {
+		stable.Website = strMatches[0][1]
+	}
+	return &stable, nil
+}
+
+type Stable struct {
+	Name    string
+	Address string
+	Phone   string
+	Website string
+	ID      string
 }
 
 /* Notes:
