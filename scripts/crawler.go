@@ -14,7 +14,10 @@ import (
 	"sync"
 )
 
-// Regexp vars
+/*
+Declare and compile a set of global regexp variables to be used while parsing
+HTML pages from the Maryland Horse Board's directory.
+*/
 var (
 	idRegexp      = regexp.MustCompile(`<a href="/stables/(?P<ID>[0-9a-zA-Z]+)">`)
 	nameRegexp    = regexp.MustCompile(`(?s)<h1>(?P<NAME>.+?)<`)
@@ -24,18 +27,22 @@ var (
 	addressRegexp = regexp.MustCompile(`(?s)<a href="https://maps.google.com/\?q=(?P<ADDRESS>.+?)">`)
 )
 
-// String vars
+/*
+Declare global string variables to be used throughout this code.
+*/
 var (
 	url          = "https://portal.mda.maryland.gov/stables"
 	idFileName   = "./ids.txt"
 	errFileName  = "./errIds.txt"
-	dataFileName = "./data.json"
+	dataFileName = "./portalData.json"
 )
 
+/*
+If a list of stable IDs does not exist in this directory, create it by parsing
+over the list available on the MHB portal.
+If the list does exist, use the IDs to extract information about the stables.
+*/
 func main() {
-	// Use WriteIdList to get a list of stable IDs into ids.txt.
-	// Use IterateIdList to use the stable ID list.
-	// WriteIdList()
 	fileInfo, err := os.Stat(idFileName)
 	if os.IsNotExist(err) {
 		WriteIdList()
@@ -46,12 +53,15 @@ func main() {
 	}
 }
 
+/*
+Read a list of IDs from a text file into a channel. Use a WaitGroup to read
+from that channel and send each ID to a function that will GET it and extract
+key stable information from the individual stable page.
+
+Finally, this function reads from the WaitGroup channel, marshals Stable structs
+to JSON, and writes that JSON to a file.
+*/
 func IterateIdList() {
-	// Read ids.txt into an array
-	// Start 10 goroutines, use atomic int to track index in array
-	// Goroutine will fail and add to list of failures if index %9
-	// Goroutine will otherwise succeed
-	// Write list of failures
 	idFile, err := os.Open(idFileName)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error opening id file %v\n", err)
@@ -80,7 +90,8 @@ func IterateIdList() {
 	stableCh := make(chan Stable)
 
 	// Does the order here matter?
-	// addIds closes idCh - would not be managable with larger codebase.
+	// addIds closes idCh - would not be able to mentally track this with larger
+	// codebase.
 	go addIds(idFile, idCh)
 
 	wg := new(sync.WaitGroup)
@@ -104,16 +115,23 @@ func IterateIdList() {
 				errFile.WriteString(fmt.Sprintf("%s\n", stable.ID))
 				continue
 			}
-			stableJson = append(stableJson, '\n')
+			stableJson = append(stableJson, ',', '\n')
 			dataFile.Write(stableJson)
 		}
 	}
 	fmt.Printf("Done!\n")
 }
 
+/*
+WriteIdList iterates over the pages on the MHB portal and extract the stable
+IDs. The IDs can later be used to form URLs for individual stable pages.
+
+These IDs are written to a text file, because generating the data for the
+actual website is still a pretty manual process.
+*/
 func WriteIdList() {
-	// This function parses the paginated list of stables and extracts the
-	// stable IDs. Stable IDs form the URL of the individual stable pages.
+	// I didn't use a WaitGroup here because I didn't realize you needed to
+	// wait on it in a go routine. Probably should read more about this later.
 	ch := make(chan string)
 	// Start 10 goroutines which will work over pages getting IDs
 	for i := 1; i < 11; i++ {
@@ -150,9 +168,11 @@ func WriteIdList() {
 	fmt.Printf("Done!\n")
 }
 
+/*
+processIdPage GETs a page containing a list of stables and extracts the IDs
+that form stable URLs off the page.
+*/
 func processIdPage(page int, ch chan<- string) {
-	// This function takes a single page containing a list of stables and
-	// reads all the IDs off the page.
 	for {
 		if page > 100 {
 			fmt.Fprintf(os.Stderr, "Emergency stopgap at page %d\n", page)
@@ -171,7 +191,7 @@ func processIdPage(page int, ch chan<- string) {
 			fmt.Fprintf(os.Stderr, "ReadAll err on page %d: %v\n", page, err)
 			continue
 		}
-		ids := parseIdsWithReadAll(b)
+		ids := parseIds(b)
 		if len(ids) < 1 {
 			fmt.Fprintf(os.Stderr, "Found no IDs on page %d\n", page)
 			break
@@ -185,9 +205,12 @@ func processIdPage(page int, ch chan<- string) {
 	ch <- ""
 }
 
-func parseIdsWithReadAll(data []byte) []string {
-	// This function uses a regexp to get all the IDs off a page read into
-	// memory. It assumes that we're going to call ioutil.ReadAll on resp.Body.
+/*
+parseIds uses a regexp to get all the IDs off a page. It assumes that we're
+going to call ioutil.ReadAll on resp.Body. It's one of the things that's pretty
+testable, so is its own function.
+*/
+func parseIds(data []byte) []string {
 	matches := idRegexp.FindAllSubmatch(data, -1)
 	var ids []string
 	for _, match := range matches {
@@ -196,6 +219,10 @@ func parseIdsWithReadAll(data []byte) []string {
 	return ids
 }
 
+/*
+addIds reads from the text file of IDs and puts them in a channel. Perhaps for
+readability this would be better in-lined where it is called.
+*/
 func addIds(idFile *os.File, idCh chan<- string) {
 	scanner := bufio.NewScanner(idFile)
 	for scanner.Scan() {
@@ -204,6 +231,11 @@ func addIds(idFile *os.File, idCh chan<- string) {
 	close(idCh)
 }
 
+/*
+processStablePage reads from an ID channel, GETs an individual stable page,
+and then extracts a Stable from that page. Finally, this function writes the
+Stable to an output channel.
+*/
 func processStablePage(idCh <-chan string, stableCh chan<- Stable, wg *sync.WaitGroup) {
 	defer wg.Done()
 
@@ -237,10 +269,11 @@ func processStablePage(idCh <-chan string, stableCh chan<- Stable, wg *sync.Wait
 	}
 }
 
+/*
+extractStable was easily testable. It takes a []byte of the individual stable
+HTML page and extracts information about the stable from it.
+*/
 func (stable *Stable) extractStable(data []byte) error {
-	// This function takes a page with information about a single stable and
-	// extracts that information into a struct. It mutates the input stable.
-
 	// Pick out the stable name from the <h1> tags
 	matches := nameRegexp.FindAllSubmatch(data, -1)
 	if len(matches) != 1 {
@@ -283,22 +316,3 @@ type Stable struct {
 	Website string
 	ID      string
 }
-
-/* Notes:
-1. Let's plan to go in groups of 10 over the /stables?page=x, and stop when we
-   get a 404.
-2. For each thing on page with pattern like
-   <a href="/stables/5ce71cf84d7ef91b0c22a52e">, get that id.
-3. I guess we could collect a list of IDs, then move on to page parsing. Let's
-   also save all those IDs in a file.
-4. For each page, find the "article".
-5. Everything in <h4> tags in the article is a column.
-   Unfortunately Address looks like:
-   <h4>Address:</h4>
-   <a href="https://maps.google.com/?q=8900 RACE TRACK ROAD BOWIE, MD, 20715">
-    8900 RACE TRACK ROAD<br/>
-    BOWIE, MD, 20715<br/>
-   </a>
-6. To reduce hits, just pull all the article content into a file and we can
-   parse that file later.
-*/

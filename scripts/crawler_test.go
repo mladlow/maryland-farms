@@ -7,12 +7,12 @@ import (
 	"testing"
 )
 
-func TestIdParserWithReadAll(t *testing.T) {
+func TestIdParser(t *testing.T) {
 	data, err := ioutil.ReadFile("test_id_page.html")
 	if err != nil {
 		t.Error("Couldn't read stable list page")
 	}
-	ids := parseIdsWithReadAll(data)
+	ids := parseIds(data)
 	if len(ids) != 10 {
 		t.Error("Didn't get all the ids!")
 	}
