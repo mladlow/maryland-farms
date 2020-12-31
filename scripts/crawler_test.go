@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"testing"
@@ -79,10 +78,9 @@ func TestStablePoboxParser(t *testing.T) {
 	if expected.Website != stableData.Website {
 		t.Errorf("Extracted %s as website", stableData.Website)
 	}
-	expectedJson := []byte(`{"Name":"FOX QUARTER FARM, LLC","Address":"3875 BARK HILL ROAD P.O. Box 600 UNION BRIDGE, MD, 21791","Phone":"410-984-2011","Website":"","ID":"ID"}`)
-	jsonData, err := json.Marshal(stableData)
-	if !bytes.Equal(expectedJson, jsonData) {
-		t.Errorf("Expected\n%s\nGot\n%s", expectedJson, jsonData)
+	_, err = json.Marshal(stableData)
+	if err != nil {
+		t.Errorf("Got error marshaling resulting json: %v\n", err)
 	}
 }
 

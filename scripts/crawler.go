@@ -31,7 +31,7 @@ var (
 Declare global string variables to be used throughout this code.
 */
 var (
-	url          = "https://portal.mda.maryland.gov/stables"
+	portalUrl    = "https://portal.mda.maryland.gov/stables"
 	idFileName   = "./ids.txt"
 	errFileName  = "./errIds.txt"
 	dataFileName = "./portalData.json"
@@ -42,6 +42,7 @@ If a list of stable IDs does not exist in this directory, create it by parsing
 over the list available on the MHB portal.
 If the list does exist, use the IDs to extract information about the stables.
 */
+/*
 func main() {
 	fileInfo, err := os.Stat(idFileName)
 	if os.IsNotExist(err) {
@@ -52,6 +53,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "main: Problem with id file\n")
 	}
 }
+*/
 
 /*
 Read a list of IDs from a text file into a channel. Use a WaitGroup to read
@@ -178,7 +180,7 @@ func processIdPage(page int, ch chan<- string) {
 			fmt.Fprintf(os.Stderr, "Emergency stopgap at page %d\n", page)
 			break
 		}
-		fullUrl := strings.Join([]string{url, "?page=", strconv.Itoa(page)}, "")
+		fullUrl := strings.Join([]string{portalUrl, "?page=", strconv.Itoa(page)}, "")
 		fmt.Printf("Getting %s\n", fullUrl)
 		resp, err := http.Get(fullUrl)
 		if err != nil {
@@ -242,7 +244,7 @@ func processStablePage(idCh <-chan string, stableCh chan<- Stable, wg *sync.Wait
 	for id := range idCh {
 		stable := Stable{ID: id}
 
-		stableUrl := strings.Join([]string{url, "//", id}, "")
+		stableUrl := strings.Join([]string{portalUrl, "//", id}, "")
 		resp, err := http.Get(stableUrl)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "GET err for ID %s: %v\n", id, err)
@@ -315,4 +317,6 @@ type Stable struct {
 	Phone   string
 	Website string
 	ID      string
+	Lat     float64
+	Lng     float64
 }
