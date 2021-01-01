@@ -7,4 +7,14 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attributions: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
 }).addTo(farmMap);
 
-var marker = L.marker(["39", "-77.105"]).addTo(farmMap);
+var markers = L.markerClusterGroup();
+
+for (var i = 0; i < farms.length; i++) {
+    var farm = farms[i];
+    var title = farm["Name"];
+    var marker = L.marker(new L.LatLng(farm["Lat"], farm["Lng"]), {title: title});
+    marker.bindPopup(title);
+    markers.addLayer(marker);
+}
+
+farmMap.addLayer(markers);
