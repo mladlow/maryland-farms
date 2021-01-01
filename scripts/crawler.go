@@ -117,7 +117,7 @@ func IterateIdList() {
 				errFile.WriteString(fmt.Sprintf("%s\n", stable.ID))
 				continue
 			}
-			stableJson = append(stableJson, ',', '\n')
+			stableJson = append(stableJson, '\n')
 			dataFile.Write(stableJson)
 		}
 	}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 )
 
 /*
@@ -31,11 +31,31 @@ func Geocode(inFN string, outFN string) {
 		fmt.Fprintf(os.Stderr, "Error opening input file %v\n", err)
 		return
 	}
+	defer dataFile.Close()
 
-	scanner := bufio.NewScanner(dataFile)
-	for scanner.Scan() {
+	// If this is going to make an error let's get it out of the way before
+	// doing all the queries.
+	outFile, err := os.Create(outFN)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening output file %v\n", err)
+		return
+	}
+	defer outFile.Close()
+
+	// Cheating a bit since I know there's 719 stables.
+	geocodedStables := make([]Stable, 0, 800)
+
+	dec := json.NewDecoder(dataFile)
+	// Read open bracket
+	_, err = dec.Token()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading array open %v\n", err)
+	}
+
+	for dec.More() {
 		var stable Stable
-		if err = json.Unmarshal(scanner.Bytes(), &stable); err != nil {
+		err := dec.Decode(&stable)
+		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error unmarshaling stable %v\n", err)
 			continue
 		}
@@ -43,25 +63,38 @@ func Geocode(inFN string, outFN string) {
 		geocodeQuery := strings.Join([]string{geocodeUrl, queryAddress,
 			`&key=`, api_key}, "")
 		resp, err := http.Get(geocodeQuery)
-		fmt.Printf("Query: %s\n", geocodeQuery)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error querying server %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error querying server for %s %v\n",
+				stable.ID, err)
 			continue
 		}
 		b, err := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error reading body %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error reading body for %s %v\n",
+				stable.ID, err)
 			continue
 		}
-		fmt.Printf("%s\n", b)
-		fmt.Printf("%v\n", json.Valid(b))
-		break
+		err = stable.extractGeocode(b)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error with JSON response for %s %v\n",
+				stable.ID, err)
+			fmt.Fprintf(os.Stderr, "JSON response: %s\n", b)
+			continue
+		}
+		geocodedStables = append(geocodedStables, stable)
+		time.Sleep(500 * time.Millisecond)
 	}
 
-	err = dataFile.Close()
+	enc := json.NewEncoder(outFile)
+	err = enc.Encode(geocodedStables)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error closing input file %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error writing JSON to file %v\n", err)
+	}
+
+	_, err = dec.Token()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading array close %v\n", err)
 	}
 }
 
@@ -79,13 +112,29 @@ func (stable *Stable) extractGeocode(rawData []byte) error {
 	}
 	m := j.(map[string]interface{})
 	results := m["results"].([]interface{})
-	if len(results) != 1 {
-		return errors.New(fmt.Sprintf("extractGeocode: Got %d results: %v\n", len(results), results))
+	if len(results) == 0 {
+		return errors.New(fmt.Sprintf("extractGeocode: Got no results: %v\n", results))
 	}
-	result := results[0].(map[string]interface{})
-	geometry := result["geometry"].(map[string]interface{})
+
+	// If there is more than one result, we prefer either the first result or
+	// the first result where geometry.location_type is ROOFTOP. This seemed to
+	// match the results returned by Google Maps when I searched a couple
+	// manually.
+	preferredIdx := 0
+	for idx, r := range results {
+		result := r.(map[string]interface{})
+		geometry := result["geometry"].(map[string]interface{})
+		locationType := geometry["location_type"].(string)
+		if locationType == "ROOFTOP" {
+			preferredIdx = idx
+			break
+		}
+	}
+
+	preferredResult := results[preferredIdx].(map[string]interface{})
+	geometry := preferredResult["geometry"].(map[string]interface{})
 	location := geometry["location"].(map[string]interface{})
-	stable.Address = result["formatted_address"].(string)
+	stable.Address = preferredResult["formatted_address"].(string)
 	stable.Lat = location["lat"].(float64)
 	stable.Lng = location["lng"].(float64)
 	return nil
