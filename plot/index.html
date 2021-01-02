@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html style="height: 100%">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
     integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
     crossorigin=""/>
@@ -10,8 +10,13 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
   <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
   <script src="geocoded.js"></script>
-  <body>
-    <div id="map" style="height: 800px; width: 1000px"><div>
-    <script src="./map.js"></script>
+  <body style="height: 100%">
+    <div id="container" style="height: 75%; width: 80%">
+      <div id="map" style="height: 100%"></div>
+    </div>
+    <div id="info">
+      <h1>Select a farm!</h1>
+    </div>
+    <script src="map.js"></script>
   </body>
 </html>
