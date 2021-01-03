@@ -1,6 +1,6 @@
 # maryland-farms
 
-Contains source code described in detail on [my website]*https://meggiel.com/project/updated-md-farms/).
+Contains source code described in detail on [my website](https://meggiel.com/project/updated-md-farms/).
 
 ## Scripts
 
