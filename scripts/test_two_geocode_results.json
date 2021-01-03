@@ -1,0 +1,153 @@
+{
+   "results" : [
+      {
+         "address_components" : [
+            {
+               "long_name" : "11799",
+               "short_name" : "11799",
+               "types" : [ "street_number" ]
+            },
+            {
+               "long_name" : "Fox Rest Court",
+               "short_name" : "Fox Rest Ct",
+               "types" : [ "route" ]
+            },
+            {
+               "long_name" : "New Market",
+               "short_name" : "New Market",
+               "types" : [ "locality", "political" ]
+            },
+            {
+               "long_name" : "New Market",
+               "short_name" : "New Market",
+               "types" : [ "administrative_area_level_3", "political" ]
+            },
+            {
+               "long_name" : "Frederick County",
+               "short_name" : "Frederick County",
+               "types" : [ "administrative_area_level_2", "political" ]
+            },
+            {
+               "long_name" : "Maryland",
+               "short_name" : "MD",
+               "types" : [ "administrative_area_level_1", "political" ]
+            },
+            {
+               "long_name" : "United States",
+               "short_name" : "US",
+               "types" : [ "country", "political" ]
+            },
+            {
+               "long_name" : "21774",
+               "short_name" : "21774",
+               "types" : [ "postal_code" ]
+            },
+            {
+               "long_name" : "6400",
+               "short_name" : "6400",
+               "types" : [ "postal_code_suffix" ]
+            }
+         ],
+         "formatted_address" : "11799 Fox Rest Ct, New Market, MD 21774, USA",
+         "geometry" : {
+            "location" : {
+               "lat" : 39.4179922,
+               "lng" : -77.25346019999999
+            },
+            "location_type" : "RANGE_INTERPOLATED",
+            "viewport" : {
+               "northeast" : {
+                  "lat" : 39.4193411802915,
+                  "lng" : -77.25211121970848
+               },
+               "southwest" : {
+                  "lat" : 39.4166432197085,
+                  "lng" : -77.2548091802915
+               }
+            }
+         },
+         "place_id" : "EiwxMTc5OSBGb3ggUmVzdCBDdCwgTmV3IE1hcmtldCwgTUQgMjE3NzQsIFVTQSIbEhkKFAoSCUl3_2pD0smJESTdmYMOD_7QEJdc",
+         "types" : [ "street_address" ]
+      },
+      {
+         "address_components" : [
+            {
+               "long_name" : "11799",
+               "short_name" : "11799",
+               "types" : [ "street_number" ]
+            },
+            {
+               "long_name" : "Fox Rest Court",
+               "short_name" : "Fox Rest Ct",
+               "types" : [ "route" ]
+            },
+            {
+               "long_name" : "New Market",
+               "short_name" : "New Market",
+               "types" : [ "locality", "political" ]
+            },
+            {
+               "long_name" : "New Market",
+               "short_name" : "New Market",
+               "types" : [ "administrative_area_level_3", "political" ]
+            },
+            {
+               "long_name" : "Frederick County",
+               "short_name" : "Frederick County",
+               "types" : [ "administrative_area_level_2", "political" ]
+            },
+            {
+               "long_name" : "Maryland",
+               "short_name" : "MD",
+               "types" : [ "administrative_area_level_1", "political" ]
+            },
+            {
+               "long_name" : "United States",
+               "short_name" : "US",
+               "types" : [ "country", "political" ]
+            },
+            {
+               "long_name" : "21774",
+               "short_name" : "21774",
+               "types" : [ "postal_code" ]
+            },
+            {
+               "long_name" : "6400",
+               "short_name" : "6400",
+               "types" : [ "postal_code_suffix" ]
+            }
+         ],
+         "formatted_address" : "11799 Fox Rest Ct, New Market, MD 21774, USA",
+         "geometry" : {
+            "bounds" : {
+               "northeast" : {
+                  "lat" : 39.41197349999999,
+                  "lng" : -77.2560537
+               },
+               "southwest" : {
+                  "lat" : 39.4117857,
+                  "lng" : -77.25629959999999
+               }
+            },
+            "location" : {
+               "lat" : 39.4118662,
+               "lng" : -77.2561633
+            },
+            "location_type" : "ROOFTOP",
+            "viewport" : {
+               "northeast" : {
+                  "lat" : 39.4132285802915,
+                  "lng" : -77.25482766970848
+               },
+               "southwest" : {
+                  "lat" : 39.4105306197085,
+                  "lng" : -77.25752563029148
+               }
+            }
+         },
+         "place_id" : "ChIJVVAwYE_SyYkREXGONSvtBIU",
+         "types" : [ "premise" ]
+      }
+   ],
+   "status" : "OK"
+}
