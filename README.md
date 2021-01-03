@@ -1,10 +1,10 @@
 # maryland-farms
 
-Contains source code described in detail on (my website)[https://meggiel.com/project/updated-md-farms/].
+Contains source code described in detail on [my website]*https://meggiel.com/project/updated-md-farms/).
 
 ## Scripts
 
-Go scripts to crawl the Maryland Horse Board (portal)[] and geocode stable data using the Google Maps API.
+Go scripts to crawl the Maryland Horse Board [portal](https://portal.mda.maryland.gov/stables) and geocode stable data using the Google Maps API.
 
 This is my first Go project and there's some refactoring for consistency that could happen, as well as making the command line work for things other than geocoding.
 
